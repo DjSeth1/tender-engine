@@ -1,0 +1,118 @@
+.section {
+  padding: 100px 60px;
+}
+
+.inner {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.header {
+  margin-bottom: 60px;
+}
+
+.tag {
+  font-family: var(--font-dm-mono), monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 16px;
+  display: block;
+}
+
+.headerNote {
+  color: rgba(245, 240, 232, 0.45);
+  font-size: 0.9rem;
+  margin-top: 14px;
+  max-width: 480px;
+  line-height: 1.7;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+}
+
+.card {
+  background: var(--ink);
+  padding: 48px 36px;
+  transition: background 0.3s;
+}
+
+.featured {
+  background: rgba(200, 151, 58, 0.06);
+}
+
+.tierLabel {
+  font-family: var(--font-dm-mono), monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--mid);
+  margin-bottom: 12px;
+}
+
+.tierName {
+  font-family: var(--font-playfair), serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.tierRange {
+  font-family: var(--font-playfair), serif;
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: var(--gold);
+  margin-bottom: 4px;
+  line-height: 1;
+}
+
+.tierNote {
+  font-size: 0.78rem;
+  color: var(--mid);
+  margin-bottom: 32px;
+}
+
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin-bottom: 28px;
+}
+
+.features {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.features li {
+  font-size: 0.85rem;
+  color: rgba(245, 240, 232, 0.6);
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  line-height: 1.5;
+}
+
+.features li::before {
+  content: '→';
+  color: var(--gold);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+@media (max-width: 900px) {
+  .section {
+    padding: 70px 28px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

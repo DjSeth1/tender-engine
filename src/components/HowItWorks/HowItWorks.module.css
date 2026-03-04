@@ -1,0 +1,119 @@
+.section {
+  padding: 100px 60px;
+}
+
+.inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: end;
+  margin-bottom: 80px;
+}
+
+.tag {
+  font-family: var(--font-dm-mono), monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 16px;
+  display: block;
+}
+
+.desc {
+  color: rgba(245, 240, 232, 0.5);
+  line-height: 1.8;
+  font-size: 1rem;
+  padding-top: 10px;
+}
+
+.pipeline {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+}
+
+.step {
+  background: var(--ink);
+  padding: 36px 32px;
+  transition: background 0.3s;
+}
+
+.step:hover {
+  background: rgba(200, 151, 58, 0.04);
+}
+
+.stepNum {
+  font-family: var(--font-dm-mono), monospace;
+  font-size: 0.7rem;
+  color: var(--gold);
+  letter-spacing: 0.15em;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.stepTitle {
+  font-family: var(--font-playfair), serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: var(--cream);
+}
+
+.stepBody {
+  font-size: 0.85rem;
+  color: var(--mid);
+  line-height: 1.7;
+}
+
+.statusBadge {
+  margin-top: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-dm-mono), monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.statusDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.status_live {
+  color: #4ade80;
+}
+
+.status_auto {
+  color: var(--gold);
+}
+
+.status_partner {
+  color: #60a5fa;
+}
+
+@media (max-width: 900px) {
+  .section {
+    padding: 70px 28px;
+  }
+
+  .header {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .pipeline {
+    grid-template-columns: 1fr;
+  }
+}

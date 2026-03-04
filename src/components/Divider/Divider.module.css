@@ -1,0 +1,11 @@
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+  margin: 0 60px;
+}
+
+@media (max-width: 900px) {
+  .divider {
+    margin: 0 28px;
+  }
+}
