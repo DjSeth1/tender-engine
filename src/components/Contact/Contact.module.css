@@ -164,6 +164,12 @@
   cursor: default;
 }
 
+.errorMsg {
+  font-size: 0.82rem;
+  color: #f87171;
+  margin-top: -4px;
+}
+
 @media (max-width: 900px) {
   .section {
     padding: 70px 28px;

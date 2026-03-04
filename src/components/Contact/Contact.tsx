@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useState, useRef, type FormEvent } from 'react';
 import styles from './Contact.module.css';
 
 const SECTORS = [
@@ -13,12 +13,45 @@ const SECTORS = [
   'Other',
 ] as const;
 
-export default function Contact() {
-  const [submitted, setSubmitted] = useState(false);
+type Status = 'idle' | 'loading' | 'success' | 'error';
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+export default function Contact() {
+  const [status, setStatus] = useState<Status>('idle');
+  const [errorMsg, setErrorMsg] = useState('');
+  const formRef = useRef<HTMLFormElement>(null);
+
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setSubmitted(true);
+    setStatus('loading');
+    setErrorMsg('');
+
+    const form = e.currentTarget;
+    const data = {
+      name: (form.elements.namedItem('name') as HTMLInputElement).value,
+      company: (form.elements.namedItem('company') as HTMLInputElement).value,
+      email: (form.elements.namedItem('email') as HTMLInputElement).value,
+      sector: (form.elements.namedItem('sector') as HTMLSelectElement).value,
+      message: (form.elements.namedItem('message') as HTMLTextAreaElement).value,
+    };
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      if (!res.ok) {
+        const json = await res.json();
+        throw new Error(json.error ?? 'Something went wrong');
+      }
+
+      setStatus('success');
+      formRef.current?.reset();
+    } catch (err) {
+      setStatus('error');
+      setErrorMsg(err instanceof Error ? err.message : 'Something went wrong');
+    }
   }
 
   return (
@@ -76,11 +109,17 @@ export default function Contact() {
 
         {/* Right column — form */}
         <div className="reveal reveal-delay-1">
-          <form className={styles.form} onSubmit={handleSubmit} noValidate>
+          <form
+            ref={formRef}
+            className={styles.form}
+            onSubmit={handleSubmit}
+            noValidate
+          >
             <div className={styles.formRow}>
               <div className={styles.formGroup}>
                 <label className={styles.label}>Your Name</label>
                 <input
+                  name="name"
                   className={styles.input}
                   type="text"
                   placeholder="Jane Smith"
@@ -90,10 +129,10 @@ export default function Contact() {
               <div className={styles.formGroup}>
                 <label className={styles.label}>Company</label>
                 <input
+                  name="company"
                   className={styles.input}
                   type="text"
                   placeholder="Acme Pty Ltd"
-                  required
                 />
               </div>
             </div>
@@ -101,6 +140,7 @@ export default function Contact() {
             <div className={styles.formGroup}>
               <label className={styles.label}>Email</label>
               <input
+                name="email"
                 className={styles.input}
                 type="email"
                 placeholder="jane@company.com.au"
@@ -110,7 +150,7 @@ export default function Contact() {
 
             <div className={styles.formGroup}>
               <label className={styles.label}>Tender Type / Sector</label>
-              <select className={styles.select} defaultValue="">
+              <select name="sector" className={styles.select} defaultValue="">
                 <option value="" disabled>Select sector...</option>
                 {SECTORS.map((s) => (
                   <option key={s} value={s}>{s}</option>
@@ -121,17 +161,24 @@ export default function Contact() {
             <div className={styles.formGroup}>
               <label className={styles.label}>Tell us about the tender</label>
               <textarea
+                name="message"
                 className={styles.textarea}
                 placeholder="Paste the tender name or reference number, closing date, and any context about your business. If you have the RFT, email it to tenders@watersideai.com.au and mention it here."
               />
             </div>
 
+            {status === 'error' && (
+              <p className={styles.errorMsg}>{errorMsg}</p>
+            )}
+
             <button
               type="submit"
-              className={`${styles.submit} ${submitted ? styles.submitSuccess : ''}`}
-              disabled={submitted}
+              className={`${styles.submit} ${status === 'success' ? styles.submitSuccess : ''}`}
+              disabled={status === 'loading' || status === 'success'}
             >
-              {submitted ? "Sent! We'll be in touch within 48hrs." : 'Submit Enquiry →'}
+              {status === 'loading' && 'Sending…'}
+              {status === 'success' && "Sent! We'll be in touch within 48hrs."}
+              {(status === 'idle' || status === 'error') && 'Submit Enquiry →'}
             </button>
           </form>
         </div>
