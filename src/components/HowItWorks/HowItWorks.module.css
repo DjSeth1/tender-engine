@@ -1,5 +1,6 @@
 .section {
   padding: 100px 60px;
+  background: var(--bg);
 }
 
 .inner {
@@ -12,23 +13,23 @@
   grid-template-columns: 1fr 1fr;
   gap: 60px;
   align-items: end;
-  margin-bottom: 80px;
+  margin-bottom: 72px;
 }
 
 .tag {
-  font-family: var(--font-dm-mono), monospace;
-  font-size: 0.72rem;
+  font-family: var(--font-space-mono), monospace;
+  font-size: 0.68rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--gold);
-  margin-bottom: 16px;
+  color: var(--sage);
+  margin-bottom: 14px;
   display: block;
 }
 
 .desc {
-  color: rgba(245, 240, 232, 0.5);
+  color: var(--ink-soft);
   line-height: 1.8;
-  font-size: 1rem;
+  font-size: 0.95rem;
   padding-top: 10px;
 }
 
@@ -41,36 +42,36 @@
 }
 
 .step {
-  background: var(--ink);
+  background: var(--bg);
   padding: 36px 32px;
-  transition: background 0.3s;
+  transition: background 0.25s;
 }
 
 .step:hover {
-  background: rgba(200, 151, 58, 0.04);
+  background: var(--surface);
 }
 
 .stepNum {
-  font-family: var(--font-dm-mono), monospace;
-  font-size: 0.7rem;
-  color: var(--gold);
+  font-family: var(--font-space-mono), monospace;
+  font-size: 0.65rem;
+  color: var(--ink-muted);
   letter-spacing: 0.15em;
   margin-bottom: 16px;
   display: block;
 }
 
 .stepTitle {
-  font-family: var(--font-playfair), serif;
-  font-size: 1.2rem;
+  font-family: var(--font-baskerville), serif;
+  font-size: 1.15rem;
   font-weight: 700;
   margin-bottom: 10px;
-  color: var(--cream);
+  color: var(--ink);
 }
 
 .stepBody {
   font-size: 0.85rem;
-  color: var(--mid);
-  line-height: 1.7;
+  color: var(--ink-soft);
+  line-height: 1.75;
 }
 
 .statusBadge {
@@ -78,8 +79,8 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-family: var(--font-dm-mono), monospace;
-  font-size: 0.68rem;
+  font-family: var(--font-space-mono), monospace;
+  font-size: 0.65rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
@@ -92,15 +93,15 @@
 }
 
 .status_live {
-  color: #4ade80;
+  color: #5a9e6f;
 }
 
 .status_auto {
-  color: var(--gold);
+  color: var(--sage);
 }
 
 .status_partner {
-  color: #60a5fa;
+  color: #7a96b5;
 }
 
 @media (max-width: 900px) {

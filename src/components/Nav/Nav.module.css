@@ -3,24 +3,25 @@
   top: 0;
   width: 100%;
   z-index: 100;
-  padding: 24px 60px;
+  padding: 20px 60px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: linear-gradient(to bottom, rgba(10, 10, 15, 0.95), transparent);
-  backdrop-filter: blur(2px);
+  background: rgba(245, 245, 243, 0.92);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
 }
 
 .logo {
-  font-family: var(--font-playfair), serif;
-  font-size: 1.4rem;
+  font-family: var(--font-baskerville), serif;
+  font-size: 1.2rem;
   font-weight: 700;
-  color: var(--cream);
+  color: var(--ink);
   letter-spacing: -0.02em;
 }
 
 .logo span {
-  color: var(--gold);
+  color: var(--sage);
 }
 
 .links {
@@ -30,36 +31,37 @@
 }
 
 .links a {
-  color: rgba(245, 240, 232, 0.6);
+  color: var(--ink-muted);
   text-decoration: none;
-  font-size: 0.85rem;
-  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
+  font-family: var(--font-space-mono), monospace;
   transition: color 0.2s;
 }
 
 .links a:hover {
-  color: var(--gold);
+  color: var(--ink);
 }
 
 .cta {
-  background: var(--gold);
-  color: var(--ink) !important;
-  padding: 10px 22px;
+  background: var(--ink) !important;
+  color: var(--bg) !important;
+  padding: 9px 20px;
   border-radius: 2px;
-  font-weight: 500 !important;
-  letter-spacing: 0.06em !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.08em !important;
   transition: background 0.2s !important;
 }
 
 .cta:hover {
-  background: var(--gold-light) !important;
-  color: var(--ink) !important;
+  background: var(--sage-dark) !important;
+  color: var(--bg) !important;
 }
 
 @media (max-width: 900px) {
   .nav {
-    padding: 20px 28px;
+    padding: 18px 28px;
   }
 
   .links {

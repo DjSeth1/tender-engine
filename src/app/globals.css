@@ -1,11 +1,14 @@
 :root {
-  --ink: #0a0a0f;
-  --cream: #f5f0e8;
-  --gold: #c8973a;
-  --gold-light: #e8b84b;
-  --slate: #1c1c2e;
-  --mid: #6b6b7b;
-  --border: rgba(200, 151, 58, 0.2);
+  --bg: #f5f5f3;
+  --surface: #eceae6;
+  --section-alt: #eeede9;
+  --ink: #1c1c1c;
+  --ink-soft: #4a4a4a;
+  --ink-muted: #8a8a8a;
+  --sage: #6b8f6b;
+  --sage-dark: #4e6e4e;
+  --border: #e4e4e0;
+  --border-dark: #d0d0cb;
 }
 
 * {
@@ -19,38 +22,28 @@ html {
 }
 
 body {
-  background: var(--ink);
-  color: var(--cream);
-  font-family: var(--font-dm-sans), sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-inter), sans-serif;
   font-weight: 300;
   overflow-x: hidden;
 }
 
-/* Noise texture overlay */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-  pointer-events: none;
-  z-index: 9999;
-  opacity: 0.4;
-}
-
 h2 {
-  font-family: var(--font-playfair), serif;
-  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-family: var(--font-baskerville), serif;
+  font-size: clamp(1.9rem, 3.5vw, 2.9rem);
   font-weight: 700;
   line-height: 1.1;
   letter-spacing: -0.02em;
   margin-bottom: 20px;
+  color: var(--ink);
 }
 
 /* Scroll reveal */
 .reveal {
   opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.7s ease, transform 0.7s ease;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
 .reveal.visible {
@@ -62,11 +55,10 @@ h2 {
 .reveal-delay-2 { transition-delay: 0.2s; }
 .reveal-delay-3 { transition-delay: 0.3s; }
 
-/* Keyframes */
 @keyframes fadeUp {
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(24px);
   }
   to {
     opacity: 1;
@@ -76,5 +68,5 @@ h2 {
 
 @keyframes pulse {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
+  50% { opacity: 0.4; }
 }

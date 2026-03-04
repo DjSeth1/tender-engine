@@ -11,13 +11,13 @@ const PIPELINE: PipeStep[] = [
   {
     num: '01 — Intake',
     title: 'Tender Received',
-    body: 'Partner forwards the RFT to our dedicated inbox. n8n detects the attachment, creates a tender record in Notion, and uploads to Google Drive automatically.',
+    body: 'Partner forwards the RFT to our dedicated inbox. Our workflow detects the attachment, creates a tender record, and uploads all documents to a shared workspace automatically.',
     status: 'auto',
   },
   {
     num: '02 — Triage',
     title: 'Deep Analysis',
-    body: "The triage agent reads the full RFT, maps every requirement against the client's evidence library, and flags compliance gaps, risks, and scoring opportunities.",
+    body: "Our automated triage process reads the full RFT, maps every requirement against the client's evidence library, and flags compliance gaps, risks, and scoring opportunities.",
     status: 'live',
   },
   {
@@ -29,7 +29,7 @@ const PIPELINE: PipeStep[] = [
   {
     num: '04 — Drafting',
     title: 'Full Response Written',
-    body: 'Once the profile is complete, the drafting agent writes every scored section — section by section, highest weight first — using real client evidence, never fabricated claims.',
+    body: 'Once the profile is complete, our drafting workflow writes every scored section — section by section, highest weight first — using real client evidence, never fabricated claims.',
     status: 'live',
   },
   {
@@ -58,10 +58,11 @@ export default function HowItWorks() {
             </h2>
           </div>
           <p className={styles.desc}>
-            Partner sends us the RFT. Our agents read it, cross-reference your
-            client&apos;s profile, flag gaps, and draft every scored section. You
-            review. Client submits. The whole process is built around minimising
-            every human touchpoint that doesn&apos;t require genuine expertise.
+            Partner sends us the RFT. Our automated pipeline reads it,
+            cross-references your client&apos;s profile, flags gaps, and drafts
+            every scored section. You review. Client submits. The whole process
+            is built around minimising every human touchpoint that doesn&apos;t
+            require genuine expertise.
           </p>
         </div>
 

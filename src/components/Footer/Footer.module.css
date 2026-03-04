@@ -1,34 +1,42 @@
 .footer {
   border-top: 1px solid var(--border);
-  padding: 48px 60px;
+  padding: 44px 60px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background: var(--bg);
 }
 
 .logo {
-  font-family: var(--font-playfair), serif;
-  font-size: 1.1rem;
+  font-family: var(--font-baskerville), serif;
+  font-size: 1.05rem;
   font-weight: 700;
+  color: var(--ink);
 }
 
 .logo span {
-  color: var(--gold);
+  color: var(--sage);
 }
 
 .copy {
-  font-size: 0.78rem;
-  color: var(--mid);
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+  font-family: var(--font-space-mono), monospace;
 }
 
 .by {
-  font-size: 0.78rem;
-  color: var(--mid);
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+  font-family: var(--font-space-mono), monospace;
 }
 
 .by a {
-  color: var(--gold);
+  color: var(--sage-dark);
   text-decoration: none;
+}
+
+.by a:hover {
+  text-decoration: underline;
 }
 
 @media (max-width: 900px) {
@@ -36,6 +44,6 @@
     flex-direction: column;
     gap: 16px;
     text-align: center;
-    padding: 40px 28px;
+    padding: 36px 28px;
   }
 }

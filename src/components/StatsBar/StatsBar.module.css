@@ -1,12 +1,12 @@
 .statsBar {
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
-  padding: 36px 60px;
+  padding: 40px 60px;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 20px;
   text-align: center;
-  background: rgba(200, 151, 58, 0.02);
+  background: var(--surface);
 }
 
 .statItem {
@@ -14,19 +14,20 @@
 }
 
 .statNum {
-  font-family: var(--font-playfair), serif;
-  font-size: 2.4rem;
+  font-family: var(--font-baskerville), serif;
+  font-size: 2.2rem;
   font-weight: 700;
-  color: var(--gold);
+  color: var(--ink);
   line-height: 1;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .statLabel {
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--mid);
+  color: var(--ink-muted);
+  font-family: var(--font-space-mono), monospace;
 }
 
 @media (max-width: 900px) {

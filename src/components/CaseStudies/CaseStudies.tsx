@@ -25,7 +25,7 @@ const CASES: CaseCard[] = [
   {
     sector: 'Food & Beverage / Imports',
     name: 'Thirsty Wolf Imports',
-    body: 'Thirsty Wolf approached TenderEngine to compete for a packaged wine supply contract (PAR25750). Our triage agent identified a critical compliance gap — public liability insurance not yet in place — and flagged it before the draft was written. Instead of submitting a non-compliant tender, the partner had the information needed to resolve it first. The response was held until the requirement was met. That\'s the system working exactly as intended.',
+    body: "Thirsty Wolf approached TenderEngine to compete for a packaged wine supply contract (PAR25750). Our automated triage identified a critical compliance gap — public liability insurance not yet in place — and flagged it before the draft was written. Instead of submitting a non-compliant tender, the partner had the information needed to resolve it first. The response was held until the requirement was met. That's the system working exactly as intended.",
     metrics: [
       { val: '1', label: 'Gap flagged early' },
       { val: 'PAR', label: '25750 target' },

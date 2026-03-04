@@ -1,29 +1,30 @@
 import type { Metadata } from 'next';
-import { Playfair_Display, DM_Sans, DM_Mono } from 'next/font/google';
+import { Libre_Baskerville, Inter, Space_Mono } from 'next/font/google';
 import './globals.css';
 
-const playfair = Playfair_Display({
+const baskerville = Libre_Baskerville({
   subsets: ['latin'],
-  weight: ['400', '700', '900'],
-  variable: '--font-playfair',
+  weight: ['400', '700'],
+  style: ['normal', 'italic'],
+  variable: '--font-baskerville',
 });
 
-const dmSans = DM_Sans({
+const inter = Inter({
   subsets: ['latin'],
   weight: ['300', '400', '500'],
-  variable: '--font-dm-sans',
+  variable: '--font-inter',
 });
 
-const dmMono = DM_Mono({
+const spaceMono = Space_Mono({
   subsets: ['latin'],
-  weight: ['400', '500'],
-  variable: '--font-dm-mono',
+  weight: ['400', '700'],
+  variable: '--font-space-mono',
 });
 
 export const metadata: Metadata = {
-  title: 'TenderEngine — AI-Powered Tender Responses',
+  title: 'TenderEngine — Tender Responses, Done Right',
   description:
-    'TenderEngine uses AI agents to triage, analyse, and draft government tender responses — so your team spends 45 minutes per bid instead of 45 hours.',
+    'TenderEngine handles the heavy lifting on government tender responses — triage, analysis, and drafting — so your team can focus on what matters.',
 };
 
 export default function RootLayout({
@@ -33,7 +34,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${playfair.variable} ${dmSans.variable} ${dmMono.variable}`}>
+      <body className={`${baskerville.variable} ${inter.variable} ${spaceMono.variable}`}>
         {children}
       </body>
     </html>
