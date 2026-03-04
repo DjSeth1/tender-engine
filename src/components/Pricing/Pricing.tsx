@@ -53,7 +53,7 @@ export default function Pricing() {
         <div className={`${styles.header} reveal`}>
           <span className={styles.tag}>Pricing</span>
           <h2>
-            One price.<br />Per tender.
+            One price. One tender.<br />Here&apos;s the score.
           </h2>
           <p className={styles.headerNote}>
             No retainers. No monthly fees. You pay per tender, priced by
