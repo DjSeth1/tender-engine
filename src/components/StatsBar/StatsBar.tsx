@@ -2,10 +2,10 @@ import type { StatItem } from '@/types';
 import styles from './StatsBar.module.css';
 
 const STATS: StatItem[] = [
-  { num: '45min', label: 'Your time per tender' },
-  { num: '$8k', label: 'Revenue per complex tender' },
-  { num: '10', label: 'Automated pipeline stages' },
-  { num: '~$0', label: 'AI cost per submission' },
+  { num: '45min', label: 'Your time, per bid' },
+  { num: '$8k', label: 'Revenue per complex RFT' },
+  { num: '10', label: 'Steps in our process' },
+  { num: '~$0', label: 'Cost per draft' },
 ];
 
 export default function StatsBar() {

@@ -5,7 +5,7 @@ const CASES: CaseCard[] = [
   {
     sector: 'Commercial Cleaning',
     name: 'Extreme Cleaning & Maintenance Services',
-    body: 'Operating across Victoria with an established client roster including ALDI Stores (78 locations), ECMS came to TenderEngine needing to compete for government and institutional cleaning contracts — without the internal tender writing capability to do it effectively. We built their complete evidence library from their existing documents, then used it to produce a submission-ready response for their first government RFT within days.',
+    body: 'ECMS had the track record — 78 ALDI stores, years of commercial work across Victoria — but no internal capability to translate it into government procurement language. We built their evidence library from existing documents and delivered their first submission-ready response in three days.',
     metrics: [
       { val: '78', label: 'Commercial sites' },
       { val: '3d', label: 'Turnaround' },
@@ -15,7 +15,7 @@ const CASES: CaseCard[] = [
   {
     sector: 'Coffee & Equipment Supply',
     name: 'Arista Coffee',
-    body: 'Arista supplies commercial barista equipment to venues ranging from single-group cafes to large-scale institutional operations — with machines offered at no cost to qualifying clients. Their challenge was translating a complex, flexible commercial offering into the structured language government procurement requires. TenderEngine mapped their equipment tiers and service model into a submission that spoke directly to how public sector evaluators score supply contracts.',
+    body: "Arista's model doesn't fit neatly into a tender form — flexible equipment tiers, no upfront machine costs, service-led pricing. We structured it all into language government evaluators understand, without losing what makes the offer genuinely strong.",
     metrics: [
       { val: '4+', label: 'Equipment tiers' },
       { val: '$0', label: 'Machine cost to client' },
@@ -25,7 +25,7 @@ const CASES: CaseCard[] = [
   {
     sector: 'Food & Beverage / Imports',
     name: 'Thirsty Wolf Imports',
-    body: "Thirsty Wolf approached TenderEngine to compete for a packaged wine supply contract (PAR25750). Our automated triage identified a critical compliance gap — public liability insurance not yet in place — and flagged it before the draft was written. Instead of submitting a non-compliant tender, the partner had the information needed to resolve it first. The response was held until the requirement was met. That's the system working exactly as intended.",
+    body: 'Before we drafted a single word, we flagged a critical gap: public liability insurance wasn\'t in place. The submission would have been non-compliant. We paused, informed the partner, and waited. The response was held until the requirement was met. That\'s the process working exactly as intended.',
     metrics: [
       { val: '1', label: 'Gap flagged early' },
       { val: 'PAR', label: '25750 target' },
@@ -40,7 +40,7 @@ export default function CaseStudies() {
       <div className={styles.glow} />
       <div className={styles.inner}>
         <div className={`${styles.header} reveal`}>
-          <span className={styles.tag}>// Client Results</span>
+          <span className={styles.tag}>Client Results</span>
           <h2>
             Real businesses.<br />Real submissions.
           </h2>

@@ -14,9 +14,10 @@ export default function Hero() {
           Win more tenders.<br />In <em>less time</em>.
         </h1>
         <p className={styles.sub}>
-          TenderEngine runs automated workflows to triage, analyse, and draft
-          government tender responses — so your team spends 45 minutes per bid
-          instead of 45 hours.
+          Most businesses spend 45 hours writing a tender response.
+          TenderEngine gets it down to 45 minutes — handling the triage,
+          the analysis, and the drafting, so you can focus on what only
+          you can do.
         </p>
         <div className={styles.actions}>
           <Link href="#contact" className={styles.btnPrimary}>

@@ -59,14 +59,14 @@ export default function Contact() {
       <div className={styles.inner}>
         {/* Left column */}
         <div className={`${styles.left} reveal`}>
-          <span className={styles.tag}>// Get In Touch</span>
+          <span className={styles.tag}>Get In Touch</span>
           <h2>
             Let&apos;s look at<br />your next tender.
           </h2>
           <p className={styles.desc}>
-            Send us the RFT and a brief on your business. We&apos;ll run a
-            complimentary triage and come back to you with a gap analysis and a
-            fixed quote before any work begins.
+            Send us the RFT. We&apos;ll review it, run a complimentary triage,
+            and come back with a clear gap analysis and a fixed price.
+            No obligation. No surprises.
           </p>
 
           <div className={styles.details}>

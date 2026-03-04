@@ -11,37 +11,37 @@ const PIPELINE: PipeStep[] = [
   {
     num: '01 — Intake',
     title: 'Tender Received',
-    body: 'Partner forwards the RFT to our dedicated inbox. Our workflow detects the attachment, creates a tender record, and uploads all documents to a shared workspace automatically.',
+    body: 'Forward the RFT to our inbox. Everything else is handled automatically — records created, documents organised, ready to go.',
     status: 'auto',
   },
   {
     num: '02 — Triage',
     title: 'Deep Analysis',
-    body: "Our automated triage process reads the full RFT, maps every requirement against the client's evidence library, and flags compliance gaps, risks, and scoring opportunities.",
+    body: 'We read every line of the RFT. Every requirement mapped, every scoring criterion noted, every gap flagged — before a word is written.',
     status: 'live',
   },
   {
     num: '03 — Gaps',
     title: 'Info Request',
-    body: 'If anything is missing, we generate a structured shopping list for the partner — prioritised by impact on the tender score. No guessing, no back-and-forth.',
+    body: 'Missing something? We produce a clear, prioritised list of what\'s needed — ordered by its impact on your score. No vague asks.',
     status: 'auto',
   },
   {
     num: '04 — Drafting',
     title: 'Full Response Written',
-    body: 'Once the profile is complete, our drafting workflow writes every scored section — section by section, highest weight first — using real client evidence, never fabricated claims.',
+    body: 'Every scored section, written in full. Highest weight first. Built from your client\'s real documents — never invented, never generic.',
     status: 'live',
   },
   {
     num: '05 — Review',
     title: 'Partner Polish',
-    body: "Draft is delivered to the partner as a formatted Google Doc. 2–3 hours of domain expertise review: the part that genuinely requires a human who knows the industry.",
+    body: 'The draft lands in a formatted Google Doc. Your team reviews, refines, applies the expertise only you have. Hours, not days.',
     status: 'partner',
   },
   {
     num: '06 — Submit',
     title: 'Submission Ready',
-    body: 'Final package assembled with all required attachments, pricing schedules, and declarations. Submitted via eTendering portal. You get notified of the outcome.',
+    body: 'Final package assembled. Attachments, schedules, declarations — all included. Client submits. You hear back on the outcome.',
     status: 'partner',
   },
 ];
@@ -52,17 +52,16 @@ export default function HowItWorks() {
       <div className={styles.inner}>
         <div className={`${styles.header} reveal`}>
           <div>
-            <span className={styles.tag}>// How It Works</span>
+            <span className={styles.tag}>How It Works</span>
             <h2>
               From inbox<br />to submission.
             </h2>
           </div>
           <p className={styles.desc}>
-            Partner sends us the RFT. Our automated pipeline reads it,
-            cross-references your client&apos;s profile, flags gaps, and drafts
-            every scored section. You review. Client submits. The whole process
-            is built around minimising every human touchpoint that doesn&apos;t
-            require genuine expertise.
+            Send us the RFT. We read every line, map it against your evidence,
+            flag the gaps, and write the response. You spend a few hours
+            reviewing. Your client submits. Most of the work is done before
+            you&apos;ve opened the document.
           </p>
         </div>
 

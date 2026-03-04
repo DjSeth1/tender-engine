@@ -51,14 +51,14 @@ export default function Pricing() {
     <section id="pricing" className={styles.section}>
       <div className={styles.inner}>
         <div className={`${styles.header} reveal`}>
-          <span className={styles.tag}>// Pricing</span>
+          <span className={styles.tag}>Pricing</span>
           <h2>
-            Transparent.<br />Per submission.
+            One price.<br />Per tender.
           </h2>
           <p className={styles.headerNote}>
-            No retainers. No subscriptions. You pay per tender, scoped by
-            complexity. First tender includes a complimentary triage report so
-            you can see exactly what you&apos;re getting before we write a word.
+            No retainers. No monthly fees. You pay per tender, priced by
+            complexity. Every engagement starts with a complimentary triage —
+            you see the gap analysis and the quote before we write a word.
           </p>
         </div>
 
