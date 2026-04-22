@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TenderEngine — Migration Plan</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.7; color: #1a1a1a; background: #fff; max-width: 900px; margin: 0 auto; padding: 48px 32px 96px; }
+  h1 { font-size: 2em; border-bottom: 2px solid #e5e7eb; padding-bottom: 12px; margin-top: 0; }
+  h2 { font-size: 1.4em; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px; margin-top: 48px; }
+  h3 { font-size: 1.1em; margin-top: 32px; }
+  code { background: #f3f4f6; border-radius: 4px; padding: 2px 6px; font-size: 0.875em; font-family: "SF Mono", "Fira Code", monospace; }
+  pre { background: #f3f4f6; border-radius: 8px; padding: 20px; overflow-x: auto; border: 1px solid #e5e7eb; }
+  pre code { background: none; padding: 0; font-size: 0.85em; }
+  table { border-collapse: collapse; width: 100%; margin: 20px 0; font-size: 0.9em; }
+  th { background: #f3f4f6; text-align: left; padding: 10px 14px; border: 1px solid #d1d5db; font-weight: 600; }
+  td { padding: 9px 14px; border: 1px solid #d1d5db; vertical-align: top; }
+  tr:nth-child(even) td { background: #f9fafb; }
+  hr { border: none; border-top: 1px solid #e5e7eb; margin: 40px 0; }
+  ul, ol { padding-left: 24px; }
+  li { margin: 4px 0; }
+  .mermaid { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 24px; margin: 24px 0; text-align: center; }
+</style>
+</head>
+<body>
+
+<h1>TenderEngine — Migration Plan</h1>
+
+<h2>What this document is</h2>
+<p>A full record of the architecture decisions made and the plan to execute them. Covers two parallel initiatives: replacing Notion with Supabase as the data layer, and replacing the Claude Code CLI subprocess with the Anthropic SDK so the system can run on Railway without any local dependencies.</p>
+
+<hr>
+
+<h2>Where we are now</h2>
+
+<h3>The problem with the current setup</h3>
+<p>The cockpit runs as a local Next.js dev server. When an agent run is triggered, the server spawns <code>claude -p</code> as a child process — the full Claude Code CLI binary — and passes it a prompt string that tells it to read its own instruction files from the local filesystem. The CLI connects to two MCP servers (Notion and Google Drive) that are configured in the local <code>~/.claude</code> config, uses those to read and write all data, and streams output back over stdout as newline-delimited JSON. The server parses that stream and pushes events to the browser over SSE.</p>
+<p>This means:</p>
+<ul>
+  <li><strong>Cannot be deployed.</strong> The subprocess model requires the Claude Code binary installed locally, plus MCP config pointing at Notion and Drive. Railway has neither.</li>
+  <li><strong>Run state is ephemeral.</strong> Everything lives in <code>globalThis.__teRunRegistry</code>. A server restart wipes every in-flight and completed run.</li>
+  <li><strong>Notion is both the database and the UI.</strong> There is no independent data layer. Notion's API is slow, rate-limited, and the property model is awkward to query.</li>
+  <li><strong>The agent wastes turns reading its own instructions.</strong> The agent spends two tool call roundtrips fetching its own instruction files before doing any real work. That costs tokens and time on every run.</li>
+</ul>
+
+<h3>Current architecture</h3>
+<div class="mermaid">
+graph TD
+    subgraph Browser
+        UI[Cockpit UI]
+    end
+    subgraph Local Machine
+        subgraph Next.js Dev Server
+            ROUTES[API Routes]
+            RUNS[lib/runs.ts globalThis in-memory]
+            ROUTES --> RUNS
+        end
+        subgraph Claude Code CLI subprocess
+            CLI[claude -p stream-json]
+            FS[agents md files from filesystem]
+            CLI --> FS
+        end
+        subgraph MCP Servers
+            NMCP[Notion MCP]
+            DMCP[Drive MCP]
+        end
+        RUNS -- spawn --> CLI
+        CLI -- tool calls --> NMCP
+        CLI -- tool calls --> DMCP
+        CLI -- stdout --> RUNS
+        RUNS -- SSE --> UI
+    end
+    subgraph External
+        NOTION[(Notion Tenders and Clients)]
+        DRIVE[(Google Drive docs)]
+        ANTHROPIC[Anthropic API]
+    end
+    NMCP --> NOTION
+    DMCP --> DRIVE
+    CLI --> ANTHROPIC
+    UI -- POST /api/agents/run --> ROUTES
+    UI -- GET SSE events --> ROUTES
+</div>
+
+<h3>Current agent run — sequence</h3>
+<div class="mermaid">
+sequenceDiagram
+    participant U as Browser
+    participant R as /api/agents/run
+    participant S as lib/runs.ts
+    participant C as claude subprocess
+    participant N as Notion MCP
+    participant D as Drive MCP
+    participant A as Anthropic API
+    U->>R: POST tenderId agentId
+    R->>S: startRun()
+    S->>C: spawn claude -p prompt
+    Note over C: 2 tool turns reading own instructions
+    C->>N: notion-fetch tenderPageUrl
+    N-->>C: tender record
+    C->>D: drive-read-file tenderDocs
+    D-->>C: tender documents
+    C->>A: messages streaming
+    A-->>C: tool calls and text
+    C-->>S: stdout stream-json
+    S-->>U: SSE FeedEvents
+    C->>N: notion-update-page triageOutput
+    C->>D: drive-create-doc draftResponse
+</div>
+
+<h3>Current environment variables</h3>
+<table>
+  <tr><th>Variable</th><th>Purpose</th></tr>
+  <tr><td><code>NOTION_TOKEN</code></td><td>Notion integration token</td></tr>
+  <tr><td><code>CLAUDE_BIN</code></td><td>Path to claude binary (defaults to <code>claude</code> on PATH)</td></tr>
+  <tr><td><code>TENDER_ENGINE_ROOT</code></td><td>Root dir for agent .md files</td></tr>
+</table>
+
+<hr>
+
+<h2>The decisions we made</h2>
+
+<h3>1. Replace Notion with Supabase Postgres</h3>
+<p><strong>Why Notion is being dropped:</strong> Notion was chosen as a convenient starting point because it has a visual UI for manual data entry and an API. But as a database it has real problems: the API is slow, rate-limited, the property model is verbose to query, and it creates a hard dependency on a third-party SaaS for what is fundamentally structured relational data. Supabase gives you real Postgres — fast queries, joins, indexes, row-level security — plus a dashboard for manual edits if needed.</p>
+<p>The <code>Tender</code> and <code>Client</code> TypeScript types in <code>lib/types.ts</code> already define the shape cleanly. They map 1:1 to Postgres columns with almost no changes.</p>
+
+<h3>2. Keep Google Drive for document storage</h3>
+<p>Google Drive was considered for replacement — Supabase Storage was evaluated as an alternative. We decided to keep Drive because:</p>
+<ul>
+  <li>The clients this system serves are non-technical. They already know how to open a Google Doc, leave a comment, and make a tracked edit.</li>
+  <li>Draft responses are produced as Google Docs. Clients open the shared link, edit inline, and return feedback without needing any new tool or workflow.</li>
+  <li>Switching to Supabase Storage would mean storing drafts as Markdown or DOCX files and building or integrating a document editor — a significant scope increase with no user benefit.</li>
+</ul>
+<p>The Drive integration changes from MCP (local config) to a Google service account with the <code>googleapis</code> npm package. The folder structure and file URLs stay identical. Nothing changes for clients.</p>
+
+<h3>3. Replace the Claude Code CLI subprocess with the Anthropic SDK agent loop</h3>
+<p>The <code>spawn('claude -p ...')</code> call in <code>lib/runs.ts</code> is replaced with an in-process agentic loop using <code>@anthropic-ai/sdk</code>. The loop:</p>
+<ol>
+  <li>Reads the relevant <code>.md</code> files and builds a system prompt before the first API call — no tool turns wasted reading instructions.</li>
+  <li>Calls <code>anthropic.messages.stream()</code> with a defined set of tools.</li>
+  <li>Executes tool calls server-side (Supabase queries, Drive API calls).</li>
+  <li>Sends tool results back to the API and loops until <code>stop_reason: end_turn</code>.</li>
+  <li>Converts streaming output into the same <code>FeedEvent</code> shape the existing SSE endpoint emits.</li>
+</ol>
+<p>The UI, SSE layer, and all route handler signatures stay unchanged. Only the internals of <code>startRun()</code> change.</p>
+<p><strong>Why the agent .md files do not need to be rewritten:</strong> The <code>.md</code> files are system prompts, not discovered plugins. Loaded before the first API call, they become the <code>system</code> parameter. The agent instructions themselves are unchanged — only the tool names referenced in them need updating to match the SDK tool names.</p>
+
+<h3>4. Deploy to Railway</h3>
+<p>Single Next.js service on Railway. No separate backend process. The SDK agent loop runs inside the Next.js API route handler — same process, no subprocess, no inter-process communication needed.</p>
+
+<hr>
+
+<h2>Target state</h2>
+
+<h3>What changes</h3>
+<table>
+  <tr><th>Layer</th><th>Before</th><th>After</th></tr>
+  <tr><td>Hosting</td><td>Local dev server</td><td>Railway</td></tr>
+  <tr><td>Agent execution</td><td>spawn subprocess</td><td>In-process Anthropic SDK agent loop</td></tr>
+  <tr><td>Agent instructions</td><td>Agent reads .md files via tool calls</td><td>.md files pre-loaded as system prompt</td></tr>
+  <tr><td>Structured data</td><td>Notion (tenders, clients)</td><td>Supabase Postgres</td></tr>
+  <tr><td>Run state</td><td>globalThis in-memory</td><td>Supabase agent_runs table</td></tr>
+  <tr><td>MCP servers</td><td>Notion MCP + Drive MCP (local config)</td><td>Supabase JS client + googleapis</td></tr>
+  <tr><td>Document storage</td><td>Google Drive via Drive MCP</td><td>Google Drive via service account</td></tr>
+  <tr><td>Client editing</td><td>Google Docs shared link</td><td>Google Docs shared link — unchanged</td></tr>
+</table>
+
+<h3>What stays the same</h3>
+<ul>
+  <li>Google Drive folder structure</li>
+  <li>Google Docs as the output format clients edit and review</li>
+  <li>SSE transport for live agent events</li>
+  <li>All UI components and cockpit route handler signatures</li>
+  <li>Agent <code>.md</code> instruction file content (unchanged, just loaded differently)</li>
+  <li>The <code>Tender</code> and <code>Client</code> TypeScript types in <code>lib/types.ts</code></li>
+</ul>
+
+<h3>Target architecture</h3>
+<div class="mermaid">
+graph TD
+    subgraph Browser
+        UI[Cockpit UI]
+    end
+    subgraph Railway
+        subgraph Next.js App
+            ROUTES[API Routes]
+        end
+        subgraph SDK Agent Loop in-process
+            LOOP[Anthropic SDK messages.stream]
+            SYS[System prompt builder CLAUDE.md + agent md]
+            LOOP --> SYS
+        end
+        subgraph Tool Handlers
+            DBTOOL[Supabase tools db_get_tender db_update_tender db_get_client db_update_client]
+            DRIVETOOL[Drive tools drive_list drive_read drive_write drive_read_doc]
+        end
+        ROUTES -- in-process --> LOOP
+        LOOP -- dispatch --> DBTOOL
+        LOOP -- dispatch --> DRIVETOOL
+        LOOP -- FeedEvents --> ROUTES
+        ROUTES -- SSE --> UI
+    end
+    subgraph Supabase
+        PG[(Postgres tenders clients agent_runs)]
+    end
+    subgraph Google Drive
+        TDOCS[Tender documents PDFs and DOCX]
+        DRAFTS[Draft Google Docs client edits here]
+        CDOCS[Client documents insurance refs]
+    end
+    subgraph Anthropic
+        API[claude-sonnet-4-6 streaming]
+    end
+    DBTOOL --> PG
+    DRIVETOOL --> TDOCS
+    DRIVETOOL --> DRAFTS
+    DRIVETOOL --> CDOCS
+    LOOP --> API
+    UI --> ROUTES
+</div>
+
+<h3>Target agent run — sequence</h3>
+<div class="mermaid">
+sequenceDiagram
+    participant U as Browser
+    participant R as API route
+    participant L as SDK agent loop
+    participant A as Anthropic API
+    participant DB as Supabase
+    participant D as Google Drive
+    U->>R: POST tenderId agentId
+    R->>DB: INSERT agent_runs state=running
+    R->>L: startRun in-process
+    Note over L: CLAUDE.md + agent md pre-loaded as system prompt
+    L->>A: messages.stream system tools prompt
+    A-->>L: tool_use db_get_tender
+    L->>DB: SELECT tenders WHERE id
+    DB-->>L: tender record
+    L->>A: tool_result
+    A-->>L: tool_use drive_read_file
+    L->>D: files.get via service account
+    D-->>L: document content
+    L->>A: tool_result
+    A-->>L: tool_use db_update_tender
+    L->>DB: UPDATE tenders SET agent_notes
+    A-->>L: tool_use drive_write_doc
+    L->>D: docs.create title content
+    L-->>R: FeedEvents
+    R-->>U: SSE stream
+    L->>DB: UPDATE agent_runs state=done
+</div>
+
+<hr>
+
+<h2>Supabase schema</h2>
+<pre><code>CREATE TABLE clients (
+  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  company_name  TEXT NOT NULL,
+  trading_name  TEXT,
+  abn           TEXT,
+  acn           TEXT,
+  contact_name  TEXT,
+  contact_email TEXT,
+  contact_phone TEXT,
+  drive_folder  TEXT,
+  profile_status TEXT DEFAULT 'Incomplete',
+  sectors       TEXT[],
+  items_missing INT  DEFAULT 0,
+  docs_reviewed INT  DEFAULT 0,
+  created_at    TIMESTAMPTZ DEFAULT now(),
+  updated_at    TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE tenders (
+  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  reference         TEXT,
+  name              TEXT NOT NULL,
+  client_id         UUID REFERENCES clients(id),
+  deadline          DATE,
+  decision_date     DATE,
+  status            TEXT DEFAULT 'New',
+  priority          TEXT DEFAULT 'Normal',
+  result            TEXT,
+  submission_method TEXT,
+  owner             TEXT,
+  output_doc        TEXT,
+  tender_docs       TEXT,
+  sections_found    INT  DEFAULT 0,
+  sections_mapped   INT  DEFAULT 0,
+  sections_drafted  INT  DEFAULT 0,
+  gaps_found        INT  DEFAULT 0,
+  blockers          TEXT DEFAULT '',
+  compliance_flags  TEXT DEFAULT '',
+  estimated_value   TEXT DEFAULT '',
+  next_action       TEXT DEFAULT '',
+  agent_notes       TEXT DEFAULT '',
+  created_at        TIMESTAMPTZ DEFAULT now(),
+  updated_at        TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE agent_runs (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tender_id   UUID REFERENCES tenders(id),
+  agent_id    TEXT NOT NULL,
+  prompt      TEXT,
+  started_at  TIMESTAMPTZ DEFAULT now(),
+  finished_at TIMESTAMPTZ,
+  state       TEXT DEFAULT 'running',
+  events      JSONB DEFAULT '[]',
+  exit_code   INT
+);
+
+CREATE INDEX ON tenders (status, deadline);
+CREATE INDEX ON agent_runs (tender_id, started_at DESC);</code></pre>
+
+<hr>
+
+<h2>SDK agent loop — how the instruction files work</h2>
+
+<h3>The current problem</h3>
+<p>The prompt today is literally: <code>"Read CLAUDE.md and agents/triage-agent.md. Run triage on [URL]"</code></p>
+<p>The agent's first two actions are always reading its own instructions — two tool call roundtrips before any real work begins. This costs tokens and adds latency on every run.</p>
+
+<h3>The fix</h3>
+<p>With the SDK, the <code>system</code> parameter is passed directly. The server pre-loads the files before the first API call:</p>
+<pre><code>function buildSystemPrompt(agentId) {
+  const claudeMd = fs.readFileSync(path.join(agentRoot, "CLAUDE.md"), "utf-8");
+  const agentMd  = fs.readFileSync(path.join(agentRoot, "agents", agentId + "-agent.md"), "utf-8");
+  return claudeMd + "\n\n---\n\n" + agentMd;
+}</code></pre>
+<p>The user message is then just: <code>"Run triage on https://..."</code> — the agent starts work immediately with zero wasted turns.</p>
+
+<hr>
+
+<h2>Tool handler design</h2>
+
+<h3>File structure</h3>
+<pre><code>tenderengine-cockpit/lib/tools/
+  supabase.ts     — Supabase tool handlers
+  drive.ts        — Google Drive tool handlers
+  index.ts        — TOOLS array + dispatch function</code></pre>
+
+<h3>Tool definitions</h3>
+<table>
+  <tr><th>Tool name</th><th>Replaces</th><th>Description</th></tr>
+  <tr><td><code>db_get_tender</code></td><td>notion-fetch</td><td>Read a tender record from Supabase by ID</td></tr>
+  <tr><td><code>db_update_tender</code></td><td>notion-update-page</td><td>Update fields on a tender record</td></tr>
+  <tr><td><code>db_get_client</code></td><td>notion-fetch</td><td>Read a client record from Supabase by ID</td></tr>
+  <tr><td><code>db_update_client</code></td><td>notion-update-page</td><td>Update fields on a client record</td></tr>
+  <tr><td><code>drive_list_files</code></td><td>drive-list-files</td><td>List files in a Google Drive folder</td></tr>
+  <tr><td><code>drive_read_file</code></td><td>drive-read-file</td><td>Read the text content of a file in Drive</td></tr>
+  <tr><td><code>drive_write_doc</code></td><td>drive-create-doc</td><td>Create or overwrite a Google Doc</td></tr>
+  <tr><td><code>drive_read_doc</code></td><td>drive-read-file</td><td>Read a Google Doc including client edits</td></tr>
+</table>
+<p>The agent <code>.md</code> files currently reference the old MCP tool names. These are updated by search-and-replace in each file — mechanical, one-time effort.</p>
+
+<hr>
+
+<h2>Target environment variables</h2>
+<table>
+  <tr><th>Variable</th><th>Purpose</th></tr>
+  <tr><td><code>ANTHROPIC_API_KEY</code></td><td>Anthropic API — agent execution and chat</td></tr>
+  <tr><td><code>SUPABASE_URL</code></td><td>Supabase project URL</td></tr>
+  <tr><td><code>SUPABASE_SERVICE_ROLE_KEY</code></td><td>Supabase service role key — full DB access</td></tr>
+  <tr><td><code>GOOGLE_SERVICE_ACCOUNT_JSON</code></td><td>Full service account JSON as a single env var</td></tr>
+  <tr><td><code>TENDER_ENGINE_ROOT</code></td><td>Optional — path to agents/ dir in container</td></tr>
+</table>
+<p>Removed: <code>NOTION_TOKEN</code>, <code>CLAUDE_BIN</code></p>
+
+<hr>
+
+<h2>Google Drive service account setup</h2>
+<ol>
+  <li>Create a service account in Google Cloud Console (Drive API must be enabled).</li>
+  <li>Download the JSON key file.</li>
+  <li>Share the <code>TenderEngine/</code> Drive folder with the service account email. Give it Editor access.</li>
+  <li>Paste the entire JSON key file content as <code>GOOGLE_SERVICE_ACCOUNT_JSON</code> in Railway.</li>
+</ol>
+
+<hr>
+
+<h2>Migration phases</h2>
+
+<h3>Phase 1 — Replace Notion with Supabase</h3>
+<p>Goal: cockpit reads and writes Supabase. Agents are unchanged in this phase — they still run via subprocess and use Notion MCP. Both sources exist in parallel during this transition.</p>
+<ul>
+  <li><strong>1a</strong> Create Supabase project. Run schema above.</li>
+  <li><strong>1b</strong> Write one-shot migration script — pull all Notion records, map properties to Postgres columns, INSERT into clients and tenders, validate row counts.</li>
+  <li><strong>1c</strong> Replace <code>/api/tenders/route.ts</code> — Supabase SELECT instead of Notion query. Response shape stays the same.</li>
+  <li><strong>1d</strong> Add <code>/api/clients/route.ts</code> — new endpoint backed by Supabase.</li>
+  <li><strong>1e</strong> Swap <code>@notionhq/client</code> for <code>@supabase/supabase-js</code> in package.json.</li>
+  <li><strong>1f</strong> Add <code>SUPABASE_URL</code> and <code>SUPABASE_SERVICE_ROLE_KEY</code> to <code>.env.local</code>.</li>
+  <li><strong>1g</strong> Smoke test — confirm tenders rail loads from Supabase.</li>
+</ul>
+
+<h3>Phase 2 — Replace subprocess with SDK agent loop</h3>
+<p>Goal: agents run in-process via Anthropic SDK. No Claude Code CLI required.</p>
+<ul>
+  <li><strong>2a</strong> <code>npm install @anthropic-ai/sdk googleapis</code></li>
+  <li><strong>2b</strong> Implement <code>lib/tools/supabase.ts</code> — four handlers wrapping supabase-js queries.</li>
+  <li><strong>2c</strong> Implement <code>lib/tools/drive.ts</code> — four handlers using googleapis with service account auth.</li>
+  <li><strong>2d</strong> Set up Google service account locally. Test drive.ts functions in isolation.</li>
+  <li><strong>2e</strong> Rewrite <code>lib/runs.ts startRun()</code> — remove <code>spawn()</code>, add <code>buildSystemPrompt()</code> and <code>runAgentLoop()</code>. Write run state to Supabase.</li>
+  <li><strong>2f</strong> Update agent <code>.md</code> files — replace Notion MCP tool names with <code>db_*</code>, Drive MCP names with <code>drive_*</code>.</li>
+  <li><strong>2g</strong> Test all five agents end-to-end locally (triage, drafting, polish, onboarding, debrief).</li>
+  <li><strong>2h</strong> Remove <code>NOTION_TOKEN</code> and <code>CLAUDE_BIN</code> from env.</li>
+</ul>
+
+<h3>Phase 3 — Deploy to Railway</h3>
+<p>Goal: running in production, accessible via a URL, zero local dependencies.</p>
+<ul>
+  <li><strong>3a</strong> Add <code>railway.json</code> to <code>tenderengine-cockpit/</code>.</li>
+  <li><strong>3b</strong> Push to GitHub. Railway deploys from connected Git repo.</li>
+  <li><strong>3c</strong> Create Railway project, connect repo, confirm Nixpacks picks up Node 20.</li>
+  <li><strong>3d</strong> Set all five env vars in Railway dashboard.</li>
+  <li><strong>3e</strong> Deploy. Smoke test: tenders load, run triage, SSE arrives in browser, Supabase row updated, Google Doc created in Drive.</li>
+  <li><strong>3f</strong> Point custom domain at Railway service.</li>
+</ul>
+
+<h3>Phase 4 — Hardening</h3>
+<ul>
+  <li><strong>Auth</strong> — Shared-secret middleware or Supabase Auth (magic link) before sharing the URL externally.</li>
+  <li><strong>Run history</strong> — Surface past <code>agent_runs</code> per tender in the cockpit UI.</li>
+  <li><strong>One active run per tender</strong> — Reject new runs if one is already running for the same tender.</li>
+  <li><strong>Health check</strong> — Add <code>/api/health</code> returning 200. Point Railway health check at it.</li>
+  <li><strong>Timeout</strong> — Verify Railway HTTP timeout is sufficient for long agent runs (check default 300s, increase to 600s if needed).</li>
+  <li><strong>Cost visibility</strong> — Log token counts from SDK result events to the <code>agent_runs</code> row.</li>
+</ul>
+
+<hr>
+
+<h2>Risk register</h2>
+<table>
+  <tr><th>Risk</th><th>Likelihood</th><th>Impact</th><th>Mitigation</th></tr>
+  <tr><td>Google Drive service account permissions wrong</td><td>Medium</td><td>High</td><td>Test read and write locally against real Drive folder before Phase 3</td></tr>
+  <tr><td>Agent .md tool names don't match SDK tool definitions</td><td>Medium</td><td>Medium</td><td>Audit every tool name in each .md file before Phase 2f</td></tr>
+  <tr><td>SSE drops behind Railway proxy</td><td>Low</td><td>Medium</td><td>X-Accel-Buffering: no header already set in the events route</td></tr>
+  <tr><td>Agent runs exceed Railway HTTP timeout</td><td>Low</td><td>High</td><td>Check Railway timeout config before go-live, increase to 600s if needed</td></tr>
+  <tr><td>Notion to Supabase migration misses records</td><td>Low</td><td>Low</td><td>Run migration script as dry-run first, validate row counts</td></tr>
+  <tr><td>In-memory event buffer lost mid-run on restart</td><td>Low</td><td>Medium</td><td>Railway rarely restarts mid-request; persistent replay can be added in Phase 4</td></tr>
+</table>
+
+<script>
+  mermaid.initialize({ startOnLoad: true, theme: 'neutral', securityLevel: 'loose' });
+</script>
+
+</body>
+</html>

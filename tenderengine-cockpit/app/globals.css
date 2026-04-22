@@ -1,0 +1,111 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --te-bg: #faf8f4;
+  --te-panel: #ffffff;
+  --te-panel-alt: #f4f1ea;
+  --te-ink: #1a1815;
+  --te-ink-2: #3a342c;
+  --te-muted: #6b6358;
+  --te-muted-soft: #8a8275;
+  --te-hairline: rgba(26, 24, 21, 0.09);
+  --te-hairline-soft: rgba(26, 24, 21, 0.05);
+  --te-accent: oklch(0.45 0.14 25);
+  --te-accent-soft: oklch(0.93 0.04 25);
+  --te-accent-ink: oklch(0.32 0.12 25);
+  --te-good: oklch(0.56 0.11 150);
+  --te-good-soft: oklch(0.94 0.04 150);
+  --te-good-ink: oklch(0.38 0.1 150);
+  --te-warn: oklch(0.68 0.13 80);
+  --te-warn-soft: oklch(0.95 0.06 80);
+  --te-warn-ink: oklch(0.42 0.1 70);
+  --te-block: oklch(0.55 0.17 28);
+  --te-block-soft: oklch(0.94 0.05 28);
+  --te-block-ink: oklch(0.38 0.14 28);
+  --te-placeholder: #d9a520;
+  --te-placeholder-soft: #fff5d1;
+  --te-placeholder-ink: #8a6a10;
+  --te-pill-bg: rgba(26, 24, 21, 0.06);
+  --te-invert-bg: #1a1815;
+  --te-invert-fg: #faf8f4;
+  --te-hover: rgba(26, 24, 21, 0.04);
+}
+
+[data-theme="dark"] {
+  --te-bg: #12100d;
+  --te-panel: #1a1814;
+  --te-panel-alt: #17140f;
+  --te-ink: #f3ede1;
+  --te-ink-2: #d8cfbe;
+  --te-muted: #8a8275;
+  --te-muted-soft: #5f5a51;
+  --te-hairline: rgba(243, 237, 225, 0.1);
+  --te-hairline-soft: rgba(243, 237, 225, 0.05);
+  --te-accent: oklch(0.68 0.14 25);
+  --te-accent-soft: oklch(0.26 0.08 25);
+  --te-accent-ink: oklch(0.85 0.12 30);
+  --te-good: oklch(0.72 0.12 150);
+  --te-good-soft: oklch(0.22 0.04 150);
+  --te-good-ink: oklch(0.85 0.11 150);
+  --te-warn: oklch(0.78 0.14 80);
+  --te-warn-soft: oklch(0.24 0.05 80);
+  --te-warn-ink: oklch(0.85 0.12 80);
+  --te-block: oklch(0.72 0.16 28);
+  --te-block-soft: oklch(0.24 0.08 28);
+  --te-block-ink: oklch(0.85 0.13 28);
+  --te-placeholder: #e8c04a;
+  --te-placeholder-soft: rgba(232, 192, 74, 0.15);
+  --te-placeholder-ink: #e8c04a;
+  --te-pill-bg: rgba(243, 237, 225, 0.08);
+  --te-invert-bg: #f3ede1;
+  --te-invert-fg: #1a1815;
+  --te-hover: rgba(243, 237, 225, 0.04);
+}
+
+html,
+body {
+  background: var(--te-bg);
+  color: var(--te-ink);
+  font-family: var(--font-sans), "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-size: 13px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@keyframes te-blink {
+  0%, 48% { opacity: 1; }
+  52%, 100% { opacity: 0; }
+}
+.te-caret { animation: te-blink 1.05s steps(2) infinite; }
+
+@keyframes te-spin { to { transform: rotate(360deg); } }
+.te-spin { animation: te-spin 1.2s linear infinite; }
+
+@keyframes te-pulse {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+.te-pulse { animation: te-pulse 1.6s ease-in-out infinite; }
+
+@keyframes te-ticker {
+  0% { opacity: 0; transform: translateY(6px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.te-in { animation: te-ticker 0.28s ease-out both; }
+
+.te-row:hover { background: var(--te-hover); }
+
+button.te-btn {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  padding: 0;
+  color: inherit;
+}
+
+.font-te-serif { font-family: var(--font-serif), "Instrument Serif", "Iowan Old Style", Georgia, serif; }
+.font-te-sans  { font-family: var(--font-sans), "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; }
+.font-te-mono  { font-family: var(--font-mono), "JetBrains Mono", "SF Mono", ui-monospace, Menlo, monospace; }
